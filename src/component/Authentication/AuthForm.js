@@ -3,8 +3,11 @@ import classes from "./AuthForm.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { authActions } from "../../store/auth-slice";
 
+import { useHistory } from "react-router-dom";
+
 const AuthForm = (props) => {
   const dispatch = useDispatch();
+  const history = useHistory();
   const isLoggedIn = useSelector((state) => state.auth.haveAccount);
 
   const emailInput = useRef();
@@ -18,7 +21,6 @@ const AuthForm = (props) => {
     event.preventDefault();
     const enteredEmail = emailInput.current.value;
     const enteredPassword = passwordInput.current.value;
-
 
     if (!isLoggedIn) {
       try {
@@ -72,32 +74,13 @@ const AuthForm = (props) => {
         alert(err);
       }
     }
-    emailInput.current.value = ''
-    passwordInput.current.value = ''
+    emailInput.current.value = "";
+    passwordInput.current.value = "";
   };
 
-  const forgotPasswordHandler = async () => {
-    try {
-      const response = await fetch(
-        "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyBxIVsomBrenJOzkPf-9dKuReZ42tLWwDo",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            requestType: "PASSWORD_RESET",
-            email: emailInput.current.value,
-          }),
-          headers: {
-            "content-type": "application/json",
-          },
-        }
-      );
-      if (!response.ok) {
-        let errorMessage = "Authentication Failed";
-        throw new Error(errorMessage);
-      }
-    } catch (err) {
-      alert(err);
-    }
+  
+  const handleForgotPassword = () => {
+    history.push("/forgot");
   };
 
   return (
@@ -116,14 +99,12 @@ const AuthForm = (props) => {
           <div className={classes.actions}>
             <button type="submit">{isLoggedIn ? "Login" : "SignUp"}</button>
           </div>
-          <div className={classes.actions}>
-            {isLoggedIn && (
-              <button type="button" onClick={forgotPasswordHandler}>
-                Forgot Password
-              </button>
-            )}
-          </div>
         </form>
+        <div className={classes.actions}>
+          {isLoggedIn && (
+            <button onClick={handleForgotPassword}>Forgot Password?</button>
+          )}
+        </div>
       </div>
       <div className={classes.actions}>
         <button onClick={loginSignupHandler}>
