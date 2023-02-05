@@ -7,24 +7,34 @@ import { uiActions } from "../../store/ui-slice";
 const ComposeMail = (props) => {
   const show = useSelector(state => state.ui.show)
   const email = useSelector(state => state.auth.email)
-  
+  const senderMail = email.replace('@', '').replace('.', '')
   const dispatch = useDispatch()
   const emailRef = useRef();
   const subjectRef = useRef();
   const mailBodyRef = useRef();
   const composeMailHandler = async(event) => {
     event.preventDefault();
-    const emailData = emailRef.current.value.replace('@', '').replace('.', '')
-    const mailData = {
+    const receiverMail = emailRef.current.value.replace('@', '').replace('.', '')
+    const recevierMailData = {
       sender: email,
       subject: subjectRef.current.value,
       body: mailBodyRef.current.value,
     };
+    const senderMailData = {
+      sentTo: emailRef.current.value,
+      subject: subjectRef.current.value,
+      body: mailBodyRef.current.value,
+    }
     try {
-      const response = await fetch(`https://mailbox-client-2ab38-default-rtdb.firebaseio.com/${emailData}.json`,{
+      await fetch(`https://mailbox-client-2ab38-default-rtdb.firebaseio.com/rec${receiverMail}.json`,{
         method: 'POST',
-        body: JSON.stringify(mailData)
+        body: JSON.stringify(recevierMailData)
       })
+      await fetch(`https://mailbox-client-2ab38-default-rtdb.firebaseio.com/sent${senderMail}.json`,{
+        method: 'POST',
+        body: JSON.stringify(senderMailData)
+      })
+      
       dispatch(uiActions.handleShow())
     }catch(error) {
       alert(error)
