@@ -3,35 +3,34 @@ import { Table, Button, Card } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { mailActions } from "../../store/mail-slice";
 import ViewMail from "./ViewMail";
+import useHttp from "../../hooks/use-http";
 
 const SentMail = () => {
+  const { sendRequest } = useHttp();
   const dispatch = useDispatch();
-  const {sentMail, changed} = useSelector((state) => state.mail);
+  const { sentMail, changed } = useSelector((state) => state.mail);
   const senderMail = useSelector((state) => state.auth.email);
   const email = senderMail.replace("@", "").replace(".", "");
+  console.log(email);
   const viewMailHandler = () => {
     dispatch(mailActions.mailHandler());
   };
 
-  const fetchSentMail = async () => {
-    const response = await fetch(
-      `https://mailbox-client-2ab38-default-rtdb.firebaseio.com/sent${email}.json`
-    );
-    if (!response.ok) {
-      throw new Error("Could not fetch sent mail");
-    }
-    const data = await response.json();
-    const newData = [];
-    for (let key in data) {
-      newData.push({ id: key, ...data[key] });
-    }
-    dispatch(mailActions.updateSentMail({ mail: newData }));
-    console.log(newData);
-  };
-
   useEffect(() => {
-    fetchSentMail();
-  }, [changed]);
+    const transformData = (data) => {
+      const newData = [];
+      for (let key in data) {
+        newData.push({ id: key, ...data[key] });
+      }
+      dispatch(mailActions.updateSentMail({ mail: newData }));
+    };
+    sendRequest(
+      {
+        url: `https://mailbox-client-2ab38-default-rtdb.firebaseio.com/sent${email}.json`,
+      },
+      transformData
+    );
+  }, [sendRequest, dispatch, email]);
 
   return (
     <Card>
@@ -55,7 +54,7 @@ const SentMail = () => {
                   View
                 </Button>
               </td>
-              <ViewMail mail={mail} email={email}  type={'sent'}/>
+              <ViewMail mail={mail} email={email} type={"sent"} />
             </tr>
           ))}
         </tbody>
