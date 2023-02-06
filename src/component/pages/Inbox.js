@@ -37,7 +37,7 @@ const Inbox = () => {
       },
       transformData
     );
-  }, [sendRequest]);
+  }, [sendRequest, changed]);
 
   return (
     <Card>

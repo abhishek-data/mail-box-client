@@ -2,10 +2,11 @@ import React, { useRef } from "react";
 import classes from "./AuthForm.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { authActions } from "../../store/auth-slice";
-
+import useHttp from "../../hooks/use-http";
 import { useHistory } from "react-router-dom";
 
 const AuthForm = (props) => {
+  const { sendRequest } = useHttp();
   const dispatch = useDispatch();
   const history = useHistory();
   const isLoggedIn = useSelector((state) => state.auth.haveAccount);
@@ -23,62 +24,40 @@ const AuthForm = (props) => {
     const enteredPassword = passwordInput.current.value;
 
     if (!isLoggedIn) {
-      try {
-        const response = await fetch(
-          "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBxIVsomBrenJOzkPf-9dKuReZ42tLWwDo",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              email: enteredEmail,
-              password: enteredPassword,
-              returnSecureToken: true,
-            }),
-            headers: {
-              "content-type": "application/json",
-            },
-          }
-        );
-        if (!response.ok) {
-          let errorMessage = "Authentication Failed";
-          throw new Error(errorMessage);
-        }
-        alert("Your Account Has Been Sucessfully Created You Can Now Login");
-      } catch (err) {
-        alert(err);
-      }
+      sendRequest({
+        url: "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBxIVsomBrenJOzkPf-9dKuReZ42tLWwDo",
+        method: "POST",
+        body: {
+          email: enteredEmail,
+          password: enteredPassword,
+          returnSecureToken: true,
+        },
+      });
+      alert("Your Account Has Been Sucessfully Created You Can Now Login");
     } else {
-      try {
-        const response = await fetch(
-          "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBxIVsomBrenJOzkPf-9dKuReZ42tLWwDo",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              email: enteredEmail,
-              password: enteredPassword,
-              returnSecureToken: true,
-            }),
-            headers: {
-              "content-type": "application/json",
-            },
-          }
+      const saveLoginData = (data) => {
+        dispatch(
+          authActions.login({ token: data.idToken, email: enteredEmail })
         );
-        if (!response.ok) {
-          let errorMessage = "Authentication Failed";
-          throw new Error(errorMessage);
-        }
-        const data = await response.json();
-        console.log(enteredEmail);
-        // const email = enteredEmail.replace("@", "").replace(".", "");
-        dispatch(authActions.login({ token: data.idToken, email: enteredEmail }));
-      } catch (err) {
-        alert(err);
-      }
+      };
+
+      sendRequest(
+        {
+          url: "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBxIVsomBrenJOzkPf-9dKuReZ42tLWwDo",
+          method: "POST",
+          body: {
+            email: enteredEmail,
+            password: enteredPassword,
+            returnSecureToken: true,
+          },
+        },
+        saveLoginData
+      );
     }
     emailInput.current.value = "";
     passwordInput.current.value = "";
   };
 
-  
   const handleForgotPassword = () => {
     history.push("/forgot");
   };
