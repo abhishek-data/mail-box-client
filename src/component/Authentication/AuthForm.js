@@ -3,12 +3,12 @@ import classes from "./AuthForm.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { authActions } from "../../store/auth-slice";
 import useHttp from "../../hooks/use-http";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const AuthForm = (props) => {
   const { sendRequest } = useHttp();
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const isLoggedIn = useSelector((state) => state.auth.haveAccount);
 
   const emailInput = useRef();
@@ -59,7 +59,7 @@ const AuthForm = (props) => {
   };
 
   const handleForgotPassword = () => {
-    history.push("/forgot");
+    navigate("/forgot")
   };
 
   return (

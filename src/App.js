@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { Route, Switch, Redirect } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import AuthForm from "./component/Authentication/AuthForm";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
@@ -33,23 +33,20 @@ function App() {
   }, [token, email, isAuthenticated]);
 
   return (
-    <Switch>
-      <Route path="/" exact>
-        {!isAuthenticated && <AuthForm />}
-        {isAuthenticated && <Header />}
+    <Routes>
+      <Route
+        path="/"
+        element={!isAuthenticated ? <AuthForm /> : <Navigate to="/welcome" />}
+      />
+      <Route
+        path="welcome/*"
+        element={isAuthenticated ? <Header /> : <Navigate to="/" />}
+      >
+        <Route path="inbox" element={<Inbox />} />
+        <Route path="sent" element={<SentMail />} />
       </Route>
-      <Route path="/forgot">
-        <ForgotPassword />
-      </Route>
-      <Route path="/inbox">
-        {isAuthenticated && <Inbox />}
-        {!isAuthenticated && <Redirect to="/" />}
-      </Route>
-      <Route path="/sent">
-        {isAuthenticated && <SentMail />}
-        {!isAuthenticated && <Redirect to="/" />}
-      </Route>
-    </Switch>
+      <Route path="/forgot" element={<ForgotPassword />} />
+    </Routes>
   );
 }
 

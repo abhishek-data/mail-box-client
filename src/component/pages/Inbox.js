@@ -37,7 +37,7 @@ const Inbox = () => {
       },
       transformData
     );
-  }, [sendRequest, changed]);
+  }, [sendRequest, changed, dispatch, email]);
 
   return (
     <Card>
